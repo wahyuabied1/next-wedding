@@ -1,0 +1,53 @@
+# Undangan Pernikahan Fifi & Abid
+
+Next.js 16 (App Router) · Lottie · Upstash Redis · siap deploy ke Vercel (`abidfifi.live`).
+
+Link tamu: `https://abidfifi.live/?to=Nama+Tamu`
+
+## Struktur
+
+| Path | Isi |
+|---|---|
+| `src/lib/config.ts` | **Semua konten**: nama, orang tua, tanggal, lokasi, rekening, urutan galeri |
+| `src/app/page.tsx` | Susunan section undangan |
+| `src/components/` | Cover + musik, hitung mundur, galeri, RSVP, hadiah, Lottie |
+| `src/app/api/rsvp/route.ts` | API komentar/RSVP (GET, POST, DELETE) |
+| `src/lib/rsvp-store.ts` | Penyimpanan (Upstash Redis; memori saat lokal) |
+| `public/` | Foto, latar, animasi Lottie, musik |
+| `assets-scrape/` | Salinan mentah aset dari situs lama (tidak ikut deploy) |
+
+## Jalankan lokal
+
+```bash
+npm install
+npm run dev        # http://localhost:3000/?to=Nama+Tamu
+```
+
+Tanpa Redis, komentar disimpan di memori (hilang saat server restart). Itu hanya untuk development.
+
+## Deploy ke Vercel
+
+1. Push proyek ke GitHub, lalu **Add New → Project** di Vercel dan pilih repo ini (atau jalankan `npx vercel`).
+2. Di project Vercel: **Storage / Marketplace → Upstash → Redis → Create**, lalu hubungkan ke project. Env
+   `UPSTASH_REDIS_REST_URL` dan `UPSTASH_REDIS_REST_TOKEN` (atau `KV_REST_API_URL` / `KV_REST_API_TOKEN`) terisi otomatis.
+3. Tambahkan env `ADMIN_TOKEN` (string acak panjang) untuk moderasi komentar.
+4. **Settings → Domains → Add** `abidfifi.live` (dan `www.abidfifi.live`). Ikuti record DNS yang ditampilkan Vercel
+   di registrar domain (biasanya `A 76.76.21.21` untuk apex dan `CNAME cname.vercel-dns.com` untuk `www`).
+5. Redeploy setelah env ditambahkan.
+
+> Tanpa Redis terpasang di production, `/api/rsvp` mengembalikan 503 (komentar tidak diterima) agar tidak ada data yang hilang diam-diam.
+
+## Moderasi komentar
+
+Ambil `id` dari `GET /api/rsvp`, lalu:
+
+```bash
+curl -X DELETE "https://abidfifi.live/api/rsvp?id=<ID>" -H "Authorization: Bearer $ADMIN_TOKEN"
+```
+
+## Catatan
+
+- Halaman diberi `noindex` (undangan pribadi). Hapus `robots` di `src/app/layout.tsx` bila ingin muncul di Google.
+- Hitung mundur menuju Akad Nikah (`countdownTarget` di `config.ts`).
+- Musik: `public/audio/song.mp3` adalah cover sebuah lagu (hak cipta pihak lain). Ganti dengan musik bebas royalti bila perlu.
+- Animasi Lottie dan ornamen berasal dari template vendor undangan lama; pastikan lisensinya mengizinkan penggunaan ulang.
