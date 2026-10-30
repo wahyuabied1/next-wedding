@@ -6,21 +6,24 @@ import Invitation from "@/components/Invitation";
 import LottieFill from "@/components/LottieFill";
 import Reveal from "@/components/Reveal";
 import Rsvp from "@/components/Rsvp";
-import { calendarUrl, countdownTarget, couple, events, venue } from "@/lib/config";
+import { calendarUrl, countdownTarget, couple, events, galleryExclude, venue } from "@/lib/config";
+import { getAllPhotos, getPhoto } from "@/lib/photos";
 
 function Person({ person }: { person: typeof couple.bride }) {
+  const photo = getPhoto(person.photo);
+  const fullName = person.degree ? `${person.name}, ${person.degree}` : person.name;
   return (
     <Reveal className="person">
       <Image
         className="oval"
-        src={person.photo}
-        alt={person.name}
-        width={person.width}
-        height={person.height}
+        src={photo.src}
+        alt={fullName}
+        width={photo.width}
+        height={photo.height}
         sizes="300px"
       />
       <span className="vline" aria-hidden="true" />
-      <h3 className="script name">{person.name}</h3>
+      <h3 className="script name">{fullName}</h3>
       {person.parents.map((line) => (
         <p key={line}>{line}</p>
       ))}
@@ -29,6 +32,9 @@ function Person({ person }: { person: typeof couple.bride }) {
 }
 
 export default function Home() {
+  const together = getPhoto(couple.together.photo);
+  const galleryPhotos = getAllPhotos(galleryExclude);
+
   return (
     <Invitation>
       <section id="opening" className="opening">
@@ -49,10 +55,10 @@ export default function Home() {
 
         <Reveal className="frame">
           <Image
-            src={couple.together.photo}
+            src={together.src}
             alt="Fifi & Abid"
-            width={couple.together.width}
-            height={couple.together.height}
+            width={together.width}
+            height={together.height}
             sizes="(max-width: 500px) 90vw, 450px"
             priority
           />
@@ -112,9 +118,8 @@ export default function Home() {
           <h2 className="script heading">Our Moments</h2>
           <p className="lead quote">&quot; A happy marriage is a long conversation which always seems too short&quot;.</p>
         </Reveal>
-        <Gallery />
+        <Gallery photos={galleryPhotos} />
         <Image className="deco deco-flowers" src="/bg/deco-flowers.webp" alt="" width={478} height={612} aria-hidden="true" />
-        <Image className="deco deco-peacock" src="/bg/deco-peacock.webp" alt="" width={306} height={615} aria-hidden="true" />
       </section>
 
       <section id="rsvp" className="section dark">

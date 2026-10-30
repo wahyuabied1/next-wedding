@@ -16,6 +16,15 @@ Link tamu: `https://abidfifi.live/?to=Nama+Tamu`
 | `public/` | Foto, latar, animasi Lottie, musik |
 | `assets-scrape/` | Salinan mentah aset dari situs lama (tidak ikut deploy) |
 
+## Mengganti / menambah foto
+
+1. Taruh file di `public/photos/` dengan format apa pun: `.jpg` `.jpeg` `.png` `.webp` `.avif` `.gif` (huruf besar/kecil bebas).
+2. Di `src/lib/config.ts` tulis **nama file tanpa ekstensi**, mis. `"photo-4"` (bukan `photo-4.jpeg`).
+3. Jalankan ulang `npm run dev` (atau `npm run photos`). Ukuran foto dibaca otomatis, tidak perlu menulis lebar/tinggi.
+
+Bila ada dua file bernama sama (mis. `photo-4.webp` dan `photo-4.jpeg`) atau file rusak, skrip berhenti dengan pesan yang jelas.
+Format iPhone `.heic` tidak bisa ditampilkan browser; ekspor dulu ke `.jpg`.
+
 ## Jalankan lokal
 
 ```bash

@@ -14,6 +14,8 @@ type Item = {
 
 type Data = { items: Item[]; hadir: number; tidak: number; total: number };
 
+const PAGE_SIZE = 10;
+
 function timeAgo(from: number, now: number): string {
   const s = Math.max(0, Math.floor((now - from) / 1000));
   if (s < 60) return `${s} detik lalu`;
@@ -30,6 +32,7 @@ export default function Rsvp() {
   const [data, setData] = useState<Data | null>(null);
   const [now, setNow] = useState<number | null>(null);
   const [open, setOpen] = useState(true);
+  const [shown, setShown] = useState(PAGE_SIZE);
   const [typedName, setTypedName] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [attendance, setAttendance] = useState("");
@@ -94,6 +97,8 @@ export default function Rsvp() {
   }
 
   const total = data?.total ?? 0;
+  const items = data?.items ?? [];
+  const remaining = Math.max(0, items.length - shown);
 
   return (
     <div className="rsvp">
@@ -164,7 +169,7 @@ export default function Rsvp() {
           </form>
 
           <ul className="rsvp-list">
-            {data?.items.map((item) => (
+            {items.slice(0, shown).map((item) => (
               <li key={item.id}>
                 <svg className="ring" width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
                   <circle cx="11" cy="19" r="8" fill="none" stroke="#e0a23a" strokeWidth="2.5" />
@@ -184,6 +189,12 @@ export default function Rsvp() {
               </li>
             ))}
           </ul>
+
+          {remaining > 0 && (
+            <button type="button" className="load-more" onClick={() => setShown((n) => n + PAGE_SIZE)}>
+              Muat lebih banyak ({remaining} lagi)
+            </button>
+          )}
         </div>
       )}
     </div>

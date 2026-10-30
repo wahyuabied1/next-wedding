@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import LottieFill from "@/components/LottieFill";
-import { audioSrc } from "@/lib/config";
+import { audioSources } from "@/lib/config";
 import { useGuestName } from "@/lib/useGuestName";
 
 /** Cover + tombol musik. Isi undangan (server component) dikirim lewat `children`. */
@@ -18,6 +18,26 @@ export default function Invitation({ children }: { children: ReactNode }) {
     if (opened) document.getElementById("opening")?.scrollIntoView({ behavior: "smooth" });
     return () => document.documentElement.classList.remove("locked");
   }, [opened]);
+
+  // Putar musik begitu halaman dibuka. Browser memblokir suara otomatis tanpa interaksi,
+  // jadi bila ditolak, musik dimulai pada interaksi pertama (klik, sentuh, atau tombol keyboard).
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const events = ["click", "touchend", "keydown"] as const;
+    const stop = () => events.forEach((name) => window.removeEventListener(name, start));
+
+    function start(event?: Event) {
+      // Tombol musik mengatur dirinya sendiri; jangan ikut memutar saat tombol itu ditekan.
+      if (event?.target instanceof Element && event.target.closest(".music")) return;
+      audio!.play().then(stop, () => {});
+    }
+
+    events.forEach((name) => window.addEventListener(name, start));
+    start(); // coba langsung saat halaman dibuka
+    return stop;
+  }, []);
 
   const open = () => {
     setOpened(true);
@@ -65,19 +85,21 @@ export default function Invitation({ children }: { children: ReactNode }) {
 
       {children}
 
-      <audio ref={audioRef} src={audioSrc} loop preload="none" onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} />
-      {opened && (
-        <button
-          type="button"
-          className={`music${playing ? " playing" : ""}`}
-          onClick={toggleMusic}
-          aria-label={playing ? "Jeda musik" : "Putar musik"}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z" />
-          </svg>
-        </button>
-      )}
+      <audio ref={audioRef} loop preload="none" onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)}>
+        {audioSources.map((src) => (
+          <source key={src} src={src} type="audio/mpeg" />
+        ))}
+      </audio>
+      <button
+        type="button"
+        className={`music${playing ? " playing" : ""}`}
+        onClick={toggleMusic}
+        aria-label={playing ? "Jeda musik" : "Putar musik"}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z" />
+        </svg>
+      </button>
     </div>
   );
 }

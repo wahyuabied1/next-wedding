@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Imperial_Script, Philosopher, Source_Serif_4 } from "next/font/google";
 import { site } from "@/lib/config";
+import { getPhoto } from "@/lib/photos";
 import "./globals.css";
+
+const og = getPhoto(site.ogImage);
 
 const script = Imperial_Script({ weight: "400", subsets: ["latin"], variable: "--font-script" });
 const body = Philosopher({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-body" });
@@ -19,9 +22,9 @@ export const metadata: Metadata = {
     siteName: site.title,
     type: "website",
     locale: "id_ID",
-    images: [{ url: site.ogImage, width: 693, height: 1080 }],
+    images: [{ url: og.src, width: og.width, height: og.height }],
   },
-  twitter: { card: "summary_large_image", title: site.title, description: site.description, images: [site.ogImage] },
+  twitter: { card: "summary_large_image", title: site.title, description: site.description, images: [og.src] },
   robots: { index: false, follow: false }, // undangan pribadi
 };
 

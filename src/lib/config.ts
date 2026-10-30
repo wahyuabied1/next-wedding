@@ -5,25 +5,24 @@ export const site = {
   title: "The Wedding of Fifi & Abid",
   description:
     "Kami mengundang Bapak/Ibu/Saudara/i untuk hadir di pernikahan Fifi & Abid, Sabtu 28 November 2026 di Hall Muzdalifah Asrama Haji Surabaya.",
-  ogImage: "/photos/photo-12.webp",
+  ogImage: "photo-12", // nama file di public/photos, tanpa ekstensi
 };
 
+// Semua `photo` di bawah = nama file di public/photos TANPA ekstensi (.jpg/.jpeg/.png/.webp/.avif/.gif).
 export const couple = {
   bride: {
-    name: "Refiana Dwi Maghfiroh, S.M., M.M",
+    name: "Refiana Dwi Maghfiroh",
+    degree: "S.M., M.M",
     parents: ["Putri Kedua dari", "Bpk. Pardiyono", "& Ibu Warsini"],
-    photo: "/photos/photo-1.webp",
-    width: 721,
-    height: 1080,
+    photo: "photo-1",
   },
   groom: {
-    name: "Wahyu Abid Arifiyanto, S.Tr.Kom.",
+    name: "Wahyu Abid Arifiyanto",
+    degree: "S.Tr.Kom.",
     parents: ["Putra Kedua dari", "Bpk. H. Supriyanto (Alm)", "& Ibu Hj. Eni Solikhatin, S.Pd"],
-    photo: "/photos/photo-3.webp",
-    width: 699,
-    height: 1080,
+    photo: "photo-3",
   },
-  together: { photo: "/photos/photo-4.webp", width: 720, height: 1080 },
+  together: { photo: "photo-000" },
   families: {
     bride: { label: "FIFI", parents: ["Bpk. Pardiyono", "Ibu Warsini"] },
     groom: { label: "ABID", parents: ["Bpk. H. Supriyanto (Alm)", "Ibu Hj. Eni Solikhatin, S.Pd"] },
@@ -33,7 +32,8 @@ export const couple = {
 export const venue = {
   name: "Hall Muzdalifah Asrama Haji Surabaya",
   address: "Jl. Manyar Kertoadi, Klampis Ngasem, Kec. Sukolilo, Surabaya, Jawa Timur 60116",
-  mapUrl: "https://www.google.com/maps/search/?api=1&query=-7.2853015,112.7791851",
+  mapUrl:
+    "https://www.google.com/maps/place/Gedung+Muzdalifah/@-7.2853015,112.7791851,759m/data=!3m2!1e3!4b1!4m6!3m5!1s0x2dd7fb014862d7bb:0xde81824696179878!8m2!3d-7.2853015!4d112.7791851!16s%2Fg%2F11twh8vyfg?entry=ttu&g_ep=EgoyMDI2MTAyMC4wIKXMDSoASAFQAw%3D%3D",
 };
 
 export type WeddingEvent = {
@@ -96,28 +96,11 @@ export const gift = {
   },
 };
 
-// Urutan foto galeri (lebar x tinggi asli, untuk next/image).
-export const gallery: { src: string; width: number; height: number }[] = [
-  [22, 604, 1080],
-  [21, 720, 1080],
-  [19, 720, 1080],
-  [20, 720, 1080],
-  [18, 720, 1080],
-  [17, 720, 1080],
-  [15, 720, 1080],
-  [14, 720, 1080],
-  [12, 693, 1080],
-  [11, 720, 1080],
-  [10, 720, 1080],
-  [9, 720, 1080],
-  [8, 720, 1080],
-  [6, 720, 1080],
-  [5, 708, 1080],
-  [4, 720, 1080],
-  [3, 699, 1080],
-  [2, 608, 1080],
-  [1, 721, 1080],
-  [7, 1080, 720],
-].map(([n, width, height]) => ({ src: `/photos/photo-${n}.webp`, width, height }));
+// Galeri otomatis berisi SEMUA foto di public/photos, kecuali yang tercantum di sini
+// (nama file tanpa ekstensi). Foto yang sudah tampil di bagian "Kedua Mempelai"
+// (bingkai berdua + potret Fifi + potret Abid) tidak diulang di galeri.
+export const galleryExclude: string[] = [couple.together.photo, couple.bride.photo, couple.groom.photo];
 
-export const audioSrc = "/audio/song.mp3";
+// Daftar lagu, dicoba berurutan: file yang tidak ada dilewati otomatis, jadi lagu pertama
+// yang benar-benar ada di public/audio yang diputar. Taruh MP3 baru di urutan paling atas.
+export const audioSources = ["/audio/love-story.mp3", "/audio/song.mp3"];

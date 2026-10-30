@@ -429,20 +429,26 @@ img {
   margin-bottom: 24px;
 }
 .gallery {
-  columns: 3;
-  column-gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: start;
   position: relative;
   z-index: 2;
+}
+.gallery-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .gallery-item {
   display: block;
   width: 100%;
-  margin: 0 0 8px;
+  margin: 0;
   padding: 0;
   border: 0;
   background: none;
   cursor: zoom-in;
-  break-inside: avoid;
   overflow: hidden;
 }
 .gallery-item img {
@@ -451,6 +457,11 @@ img {
 }
 .gallery-item:hover img {
   transform: scale(1.05);
+}
+.gallery-more {
+  position: relative;
+  z-index: 2;
+  margin-top: 18px;
 }
 .deco {
   position: absolute;
@@ -462,12 +473,6 @@ img {
   width: 62%;
   z-index: 1;
   opacity: 0.9;
-}
-.deco-peacock {
-  right: -8px;
-  bottom: 30px;
-  width: 34%;
-  z-index: 1;
 }
 
 .lightbox {
@@ -629,6 +634,23 @@ img {
 }
 .rsvp-list li:last-child {
   border-bottom: 0;
+}
+.load-more {
+  display: block;
+  width: 100%;
+  margin: 4px 0 14px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  background: none;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.load-more:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 .ring {
   flex: none;
