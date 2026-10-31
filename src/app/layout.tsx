@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Imperial_Script, Philosopher, Source_Serif_4 } from "next/font/google";
 import { site } from "@/lib/config";
-import { getPhoto } from "@/lib/photos";
 import "./globals.css";
 
-const og = getPhoto(site.ogImage);
+const og = site.ogImage;
 
 const script = Imperial_Script({ weight: "400", subsets: ["latin"], variable: "--font-script" });
 const body = Philosopher({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-body" });

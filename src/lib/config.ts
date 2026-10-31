@@ -5,7 +5,9 @@ export const site = {
   title: "The Wedding of Fifi & Abid",
   description:
     "Kami mengundang Bapak/Ibu/Saudara/i untuk hadir di pernikahan Fifi & Abid, Sabtu 28 November 2026 di Hall Muzdalifah Asrama Haji Surabaya.",
-  ogImage: "photo-12", // nama file di public/photos, tanpa ekstensi
+  // Gambar pratinjau saat tautan dibagikan (WhatsApp/Facebook/dll.). Dibuat dari photo-000 oleh
+  // `npm run og` (1200x630, di bawah 300 KB). Ganti fotonya: `node scripts/generate-og-image.mjs <nama-foto>`.
+  ogImage: { src: "/og-image.jpg", width: 1200, height: 630 },
 };
 
 // Semua `photo` di bawah = nama file di public/photos TANPA ekstensi (.jpg/.jpeg/.png/.webp/.avif/.gif).
