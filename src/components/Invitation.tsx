@@ -12,11 +12,32 @@ export default function Invitation({ children }: { children: ReactNode }) {
   const [opened, setOpened] = useState(false);
   const [playing, setPlaying] = useState(false);
 
-  // Scroll dikunci sampai undangan dibuka.
+  // Scroll dikunci sampai undangan dibuka. Selama terkunci, halaman HARUS berada di cover (tempat
+  // tombol Buka Undangan). Browser bisa memulihkan posisi scroll lama saat refresh atau tombol kembali,
+  // dan itu terjadi sebelum maupun sesudah hidrasi; tanpa penjagaan ini tamu terjebak di bawah
+  // dengan scroll terkunci dan tombolnya tidak terlihat.
   useEffect(() => {
-    document.documentElement.classList.toggle("locked", !opened);
-    if (opened) document.getElementById("opening")?.scrollIntoView({ behavior: "smooth" });
-    return () => document.documentElement.classList.remove("locked");
+    const root = document.documentElement;
+    root.classList.toggle("locked", !opened);
+
+    if (opened) {
+      document.getElementById("opening")?.scrollIntoView({ behavior: "smooth" });
+      return () => root.classList.remove("locked");
+    }
+
+    // Undangan selalu dimulai dari cover, jadi pemulihan posisi scroll oleh browser tidak berguna.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    const toTop = () => {
+      if (window.scrollY !== 0) window.scrollTo({ top: 0, behavior: "instant" });
+    };
+    toTop();
+    window.addEventListener("scroll", toTop, { passive: true });
+    window.addEventListener("pageshow", toTop); // kembali dari cache bfcache
+    return () => {
+      window.removeEventListener("scroll", toTop);
+      window.removeEventListener("pageshow", toTop);
+      root.classList.remove("locked");
+    };
   }, [opened]);
 
   // Putar musik begitu halaman dibuka. Browser memblokir suara otomatis tanpa interaksi,
