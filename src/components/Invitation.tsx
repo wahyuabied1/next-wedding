@@ -39,6 +39,37 @@ export default function Invitation({ children }: { children: ReactNode }) {
     return stop;
   }, []);
 
+  // Setelah halaman selesai dimuat dan browser senggang, unduh lagu diam-diam supaya langsung bunyi
+  // saat tombol ditekan (dengan preload="none" unduhan baru mulai saat itu, dan di data seluler
+  // bisa tertunda beberapa detik). Dilewati bila mode hemat data atau koneksi 2G.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } })
+      .connection;
+    if (connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType ?? "")) return;
+
+    let cancelled = false;
+    const preload = () => {
+      // Jangan ganggu lagu yang sudah diputar atau sudah termuat.
+      if (cancelled || !audio.paused || audio.readyState > 0) return;
+      audio.preload = "auto";
+      audio.load();
+    };
+    const schedule = () => {
+      if ("requestIdleCallback" in window) window.requestIdleCallback(preload, { timeout: 4000 });
+      else setTimeout(preload, 1500);
+    };
+
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      cancelled = true;
+      window.removeEventListener("load", schedule);
+    };
+  }, []);
+
   const open = () => {
     setOpened(true);
     audioRef.current
