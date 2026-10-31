@@ -13,11 +13,32 @@ export type Rsvp = {
 
 const HASH = "rsvp:items";
 
-// Vercel Marketplace (Upstash) menyuntikkan salah satu pasangan env ini.
-const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
-const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+// Vercel Marketplace (Upstash) menyuntikkan salah satu pasangan env ini. Saat membuat store,
+// awalan nama env bisa diubah (mis. STORAGE_KV_REST_API_URL), jadi bila nama standar tidak ada,
+// cari env mana pun yang berakhiran sama.
+function findEnv(exact: string[], suffixes: string[]): { name: string; value: string } | null {
+  for (const name of exact) {
+    const value = process.env[name];
+    if (value) return { name, value };
+  }
+  for (const [name, value] of Object.entries(process.env)) {
+    if (value && suffixes.some((suffix) => name.endsWith(suffix))) return { name, value };
+  }
+  return null;
+}
 
-const redis = url && token ? new Redis({ url, token }) : null;
+const urlEnv = findEnv(["UPSTASH_REDIS_REST_URL", "KV_REST_API_URL"], ["_REST_API_URL", "_REST_URL"]);
+const tokenEnv = findEnv(["UPSTASH_REDIS_REST_TOKEN", "KV_REST_API_TOKEN"], ["_REST_API_TOKEN", "_REST_TOKEN"]);
+
+const redis = urlEnv && tokenEnv ? new Redis({ url: urlEnv.value, token: tokenEnv.value }) : null;
+
+if (!redis && process.env.NODE_ENV === "production") {
+  // Hanya nama env (bukan nilainya) yang dicatat, aman dilihat di Vercel > Logs.
+  console.error(
+    `[rsvp] Redis belum terhubung. URL: ${urlEnv?.name ?? "TIDAK ADA"}, token: ${tokenEnv?.name ?? "TIDAK ADA"}. ` +
+      "Sambungkan store Upstash ke project ini (Environment: Production) lalu redeploy.",
+  );
+}
 
 // Fallback memori hanya untuk development lokal tanpa Redis.
 const mem = globalThis as unknown as {

@@ -11,15 +11,26 @@ import {
 const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
+// Kegagalan penyimpanan (token salah, jaringan, dll.): catat detailnya di log server,
+// kirim pesan umum ke pengunjung.
+function storeFailure(action: string, error: unknown) {
+  console.error(`[rsvp] ${action} gagal:`, error instanceof Error ? `${error.name}: ${error.message}` : error);
+  return json({ error: "Penyimpanan komentar sedang bermasalah, coba lagi nanti." }, 502);
+}
+
 export async function GET() {
   if (!storeConfigured) return json({ error: "Penyimpanan belum dikonfigurasi." }, 503);
-  const items = await listRsvps();
-  return json({
-    items: items.slice(0, 200),
-    hadir: items.filter((i) => i.attendance === "hadir").length,
-    tidak: items.filter((i) => i.attendance === "tidak").length,
-    total: items.length,
-  });
+  try {
+    const items = await listRsvps();
+    return json({
+      items: items.slice(0, 200),
+      hadir: items.filter((i) => i.attendance === "hadir").length,
+      tidak: items.filter((i) => i.attendance === "tidak").length,
+      total: items.length,
+    });
+  } catch (error) {
+    return storeFailure("GET", error);
+  }
 }
 
 export async function POST(request: Request) {
@@ -47,10 +58,6 @@ export async function POST(request: Request) {
   const guests = attendance === "hadir" && Number(body.guests) === 2 ? 2 : 1;
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-  if (!(await allowPost(ip))) {
-    return json({ error: "Terlalu cepat, coba lagi sebentar lagi." }, 429);
-  }
-
   const item = {
     id: randomUUID(),
     name,
@@ -59,7 +66,15 @@ export async function POST(request: Request) {
     guests,
     createdAt: Date.now(),
   };
-  await addRsvp(item);
+
+  try {
+    if (!(await allowPost(ip))) {
+      return json({ error: "Terlalu cepat, coba lagi sebentar lagi." }, 429);
+    }
+    await addRsvp(item);
+  } catch (error) {
+    return storeFailure("POST", error);
+  }
   return json({ item }, 201);
 }
 
@@ -74,6 +89,10 @@ export async function DELETE(request: Request) {
   }
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return json({ error: "Parameter id wajib." }, 400);
-  const removed = await deleteRsvp(id);
-  return json({ removed }, removed ? 200 : 404);
+  try {
+    const removed = await deleteRsvp(id);
+    return json({ removed }, removed ? 200 : 404);
+  } catch (error) {
+    return storeFailure("DELETE", error);
+  }
 }
