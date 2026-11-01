@@ -1,28 +1,71 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import LottieFill from "@/components/LottieFill";
+import { Flora } from "@/components/Ornaments";
 import { audioSources } from "@/lib/config";
 import { useGuestName } from "@/lib/useGuestName";
 
-/** Cover + tombol musik. Isi undangan (server component) dikirim lewat `children`. */
+// Lama animasi amplop terbuka sebelum scroll dibuka dan halaman bergeser ke isi undangan.
+const OPEN_MS = 1300;
+// Lama halaman meluncur dari cover ke isi undangan (scroll halus bawaan browser hanya ~0,5 detik dan tidak bisa diatur).
+const SCROLL_MS = 2600;
+
+/** Scroll halus berdurasi tetap (ease in-out). Berhenti bila pengguna menyentuh atau memutar roda. Mengembalikan pembatal. */
+function glideTo(target: number, ms: number) {
+  const from = window.scrollY;
+  const distance = target - from;
+  if (!distance || ms <= 0) {
+    window.scrollTo({ top: target, behavior: "instant" });
+    return () => {};
+  }
+  const begin = performance.now();
+  let frame = 0;
+  const cancel = () => {
+    cancelAnimationFrame(frame);
+    window.removeEventListener("wheel", cancel);
+    window.removeEventListener("touchstart", cancel);
+    window.removeEventListener("keydown", cancel);
+  };
+  const step = (now: number) => {
+    const t = Math.min(1, (now - begin) / ms);
+    const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    window.scrollTo({ top: from + distance * eased, behavior: "instant" });
+    if (t < 1) frame = requestAnimationFrame(step);
+    else cancel();
+  };
+  window.addEventListener("wheel", cancel, { passive: true });
+  window.addEventListener("touchstart", cancel, { passive: true });
+  window.addEventListener("keydown", cancel);
+  frame = requestAnimationFrame(step);
+  return cancel;
+}
+
+/** Cover amplop + tombol musik. Isi undangan (server component) dikirim lewat `children`. */
 export default function Invitation({ children }: { children: ReactNode }) {
   const guest = useGuestName();
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [opened, setOpened] = useState(false);
+  const [opening, setOpening] = useState(false); // animasi amplop sedang berjalan
+  const [opened, setOpened] = useState(false); // scroll sudah dibuka
   const [playing, setPlaying] = useState(false);
 
   // Scroll dikunci sampai undangan dibuka. Selama terkunci, halaman HARUS berada di cover (tempat
-  // tombol Buka Undangan). Browser bisa memulihkan posisi scroll lama saat refresh atau tombol kembali,
-  // dan itu terjadi sebelum maupun sesudah hidrasi; tanpa penjagaan ini tamu terjebak di bawah
-  // dengan scroll terkunci dan tombolnya tidak terlihat.
+  // amplop). Browser bisa memulihkan posisi scroll lama saat refresh atau tombol kembali, dan itu
+  // terjadi sebelum maupun sesudah hidrasi; tanpa penjagaan ini tamu terjebak di bawah dengan
+  // scroll terkunci dan amplopnya tidak terlihat.
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("locked", !opened);
 
     if (opened) {
-      document.getElementById("opening")?.scrollIntoView({ behavior: "smooth" });
-      return () => root.classList.remove("locked");
+      const target = document.getElementById("opening");
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const stop = target
+        ? glideTo(target.getBoundingClientRect().top + window.scrollY, reduce ? 0 : SCROLL_MS)
+        : () => {};
+      return () => {
+        stop();
+        root.classList.remove("locked");
+      };
     }
 
     // Undangan selalu dimulai dari cover, jadi pemulihan posisi scroll oleh browser tidak berguna.
@@ -61,7 +104,7 @@ export default function Invitation({ children }: { children: ReactNode }) {
   }, []);
 
   // Setelah halaman selesai dimuat dan browser senggang, unduh lagu diam-diam supaya langsung bunyi
-  // saat tombol ditekan (dengan preload="none" unduhan baru mulai saat itu, dan di data seluler
+  // saat amplop diketuk (dengan preload="none" unduhan baru mulai saat itu, dan di data seluler
   // bisa tertunda beberapa detik). Dilewati bila mode hemat data atau koneksi 2G.
   useEffect(() => {
     const audio = audioRef.current;
@@ -92,11 +135,15 @@ export default function Invitation({ children }: { children: ReactNode }) {
   }, []);
 
   const open = () => {
-    setOpened(true);
+    if (opening) return;
+    setOpening(true);
+    // Harus dipanggil di dalam ketukan pengguna agar browser mengizinkan suara.
     audioRef.current
       ?.play()
       .then(() => setPlaying(true))
       .catch(() => {});
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.setTimeout(() => setOpened(true), reduce ? 0 : OPEN_MS);
   };
 
   const toggleMusic = () => {
@@ -111,10 +158,10 @@ export default function Invitation({ children }: { children: ReactNode }) {
 
   return (
     <div className="page">
-      <section id="section-cover" className="cover">
-        <LottieFill className="lt lt-cover-flower" src="/lottie/bunga-1-2.json" />
-        <LottieFill className="lt lt-cover-peacock" src="/lottie/merak.json" />
-        <LottieFill className="lt lt-cover-bottom" src="/lottie/bunga-2-2.json" />
+      <section id="section-cover" className="cover curtain">
+        <Flora variant="hang" className="flora-cover-tr" flip priority />
+        <Flora variant="mound" className="flora-cover-bl" priority />
+        <Flora variant="mound-small" className="flora-cover-br" flip priority />
 
         <div className="cover-top">
           <p className="eyebrow">THE WEDDING OF</p>
@@ -122,17 +169,25 @@ export default function Invitation({ children }: { children: ReactNode }) {
           <p className="eyebrow">WE INVITE YOU TO CELEBRATE OUR WEDDING</p>
         </div>
 
-        <div className="cover-card">
-          <p className="cover-to">Kepada Yth.</p>
-          <p className="cover-guest">{guest || "Nama Tamu"}</p>
-          <p className="cover-note">You are cordially invited to our wedding.</p>
-          <button type="button" className="btn-white" onClick={open}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 5v6.6l2.3-2.3 1.4 1.4L12 17.4 7.3 12.7l1.4-1.4L11 13.6V7h2z" />
-            </svg>
-            Buka Undangan
-          </button>
-        </div>
+        <button type="button" className={`env${opening ? " open" : ""}`} onClick={open} aria-label="Buka undangan">
+          <span className="env-back" />
+          <span className="env-card">
+            <span className="env-to">Kepada Yth.</span>
+            <span className="env-guest">{guest || "Nama Tamu"}</span>
+            <span className="env-note">You are cordially invited to our wedding.</span>
+          </span>
+          <span className="env-front-wrap">
+            <span className="env-front" />
+          </span>
+          <span className="env-flap-wrap">
+            <span className="env-flap" />
+          </span>
+          <span className="env-seal" aria-hidden="true">
+            <span className="script">F&amp;A</span>
+          </span>
+        </button>
+
+        <p className="cover-hint">Ketuk amplop untuk membuka undangan</p>
       </section>
 
       {children}

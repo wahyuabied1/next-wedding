@@ -158,7 +158,7 @@ export default function Rsvp() {
               aria-hidden="true"
               className="hp"
             />
-            <button type="submit" className="btn-white small" disabled={sending}>
+            <button type="submit" className="btn small" disabled={sending}>
               {sending ? "Mengirim…" : "Kirim"}
             </button>
             {status && (

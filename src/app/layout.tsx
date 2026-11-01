@@ -1,14 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Bodoni_Moda, Imperial_Script, Philosopher, Source_Serif_4 } from "next/font/google";
+import { Cormorant_Garamond, Monsieur_La_Doulaise, Noto_Serif, Pinyon_Script, Quicksand } from "next/font/google";
 import { site } from "@/lib/config";
 import "./globals.css";
 
 const og = site.ogImage;
 
-const script = Imperial_Script({ weight: "400", subsets: ["latin"], variable: "--font-script" });
-const body = Philosopher({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-body" });
-const display = Bodoni_Moda({ subsets: ["latin"], variable: "--font-display" });
-const serif = Source_Serif_4({ subsets: ["latin"], variable: "--font-serif" });
+// Padanan terdekat (Google Fonts, lisensi OFL) untuk skrip copperplate pada situs referensi.
+const script = Pinyon_Script({ weight: "400", subsets: ["latin"], variable: "--font-script" });
+const display = Monsieur_La_Doulaise({ weight: "400", subsets: ["latin"], variable: "--font-display" });
+const body = Cormorant_Garamond({ weight: ["400", "500", "600", "700"], subsets: ["latin"], variable: "--font-body" });
+
+// teks ayat pada kartu oval (serif tegas seperti pada referensi)
+const verse = Noto_Serif({ weight: "400", subsets: ["latin"], variable: "--font-verse" });
+
+// teks penutup pada oval marun (sans bulat seperti pada referensi)
+const thanks = Quicksand({ subsets: ["latin"], variable: "--font-thanks" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -28,14 +34,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c3022",
+  themeColor: "#0a261d",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="id" className={`${script.variable} ${body.variable} ${display.variable} ${serif.variable}`}>
+    <html lang="id" className={`${script.variable} ${display.variable} ${body.variable} ${verse.variable} ${thanks.variable}`}>
       <body>{children}</body>
     </html>
   );

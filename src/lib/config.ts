@@ -21,13 +21,13 @@ export const couple = {
   groom: {
     name: "Wahyu Abid Arifiyanto",
     degree: "S.Tr.Kom.",
-    parents: ["Putra Kedua dari", "Bpk. H. Supriyanto (Alm)", "& Ibu Hj. Eni Solikhatin, S.Pd"],
+    parents: ["Putra Kedua dari", "Bpk. H. Supriyanto (Alm)", "& Ibu Hj. Eni Solikhah, S.Pd"],
     photo: "photo-3",
   },
   together: { photo: "photo-000" },
   families: {
     bride: { label: "FIFI", parents: ["Bpk. Pardiyono", "Ibu Warsini"] },
-    groom: { label: "ABID", parents: ["Bpk. H. Supriyanto (Alm)", "Ibu Hj. Eni Solikhatin, S.Pd"] },
+    groom: { label: "ABID", parents: ["Bpk. H. Supriyanto (Alm)", "Ibu Hj. Eni Solikhah, S.Pd"] },
   },
 };
 

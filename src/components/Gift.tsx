@@ -22,7 +22,7 @@ export default function Gift() {
 
   return (
     <div className="gift">
-      <button type="button" className="btn-white wide" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+      <button type="button" className="btn wide" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         {open ? "Tutup" : "Lihat Rekening"}
       </button>
 
@@ -48,7 +48,7 @@ export default function Gift() {
             </button>
           </div>
 
-          <a className="btn-white small" href={wa} target="_blank" rel="noopener noreferrer">
+          <a className="btn small" href={wa} target="_blank" rel="noopener noreferrer">
             Konfirmasi Hadiah
           </a>
         </div>

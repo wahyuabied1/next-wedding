@@ -65,7 +65,7 @@ export default function Gallery({ photos: gallery }: { photos: Photo[] }) {
       </div>
 
       {gallery.length > INITIAL_COUNT && (
-        <button type="button" className="btn-white wide gallery-more" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded}>
+        <button type="button" className="btn wide gallery-more" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded}>
           {expanded ? "Tampilkan lebih sedikit" : `Lihat semua (${hidden} foto lagi)`}
         </button>
       )}
