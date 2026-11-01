@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Flora } from "@/components/Ornaments";
+import Sparkles from "@/components/Sparkles";
 import { audioSources } from "@/lib/config";
 import { useGuestName } from "@/lib/useGuestName";
 
@@ -162,6 +163,9 @@ export default function Invitation({ children }: { children: ReactNode }) {
         <Flora variant="hang" className="flora-cover-tr" flip priority />
         <Flora variant="mound" className="flora-cover-bl" priority />
         <Flora variant="mound-small" className="flora-cover-br" flip priority />
+        <Sparkles group="tr" />
+        <Sparkles group="bl" />
+        <Sparkles group="br" />
 
         <div className="cover-top">
           <p className="eyebrow">THE WEDDING OF</p>
@@ -181,10 +185,9 @@ export default function Invitation({ children }: { children: ReactNode }) {
           </span>
           <span className="env-flap-wrap">
             <span className="env-flap" />
+            <span className="env-flap-in" />
           </span>
-          <span className="env-seal" aria-hidden="true">
-            <span className="script">F&amp;A</span>
-          </span>
+          <span className="env-seal" aria-hidden="true" />
         </button>
 
         <p className="cover-hint">Ketuk amplop untuk membuka undangan</p>

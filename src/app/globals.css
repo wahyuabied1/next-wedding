@@ -297,7 +297,7 @@ img {
   display: block;
   position: relative;
   width: min(82%, 340px);
-  aspect-ratio: 1.5;
+  aspect-ratio: 1.49; /* proporsi foto amplop */
   margin: 0 auto;
   padding: 0;
   border: 0;
@@ -314,7 +314,7 @@ img {
 .env-back {
   inset: 0;
   border-radius: 4px;
-  background: linear-gradient(180deg, #e8e0cf, #d6ccb5);
+  background: linear-gradient(180deg, #e2dac6, #cdc2a8); /* bagian dalam amplop */
 }
 .env-card {
   left: 7%;
@@ -333,7 +333,7 @@ img {
   transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.35s;
 }
 .env.open .env-card {
-  transform: translateY(-34%);
+  transform: translateY(-46%); /* cukup tinggi agar nama tamu yang panjang tidak tertutup lipatan depan */
 }
 .env-to {
   font-size: 13px;
@@ -343,7 +343,7 @@ img {
 }
 .env-guest {
   margin: 2px 0 3px;
-  font-size: clamp(20px, 6.2vw, 27px);
+  font-size: clamp(18px, 5.6vw, 27px);
   font-weight: 700;
   text-transform: capitalize;
   overflow-wrap: anywhere;
@@ -354,7 +354,7 @@ img {
   font-size: 13px;
   font-style: italic;
 }
-/* Pembungkus membawa bayangan; elemen dalam yang dipotong (clip-path) sehingga lipatan terlihat. */
+/* Amplop renda: satu foto dipakai dua kali, dipotong menjadi badan amplop dan tutupnya (segitiga) yang bisa terbuka. */
 .env-front-wrap {
   inset: 0;
   z-index: 3;
@@ -363,15 +363,14 @@ img {
 .env-front {
   position: absolute;
   inset: 0;
-  border-radius: 4px;
-  background: linear-gradient(180deg, #e6dcc6, #d3c8ac);
-  clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
+  background: url("/open/env.webp") center / 100% 100% no-repeat;
+  clip-path: polygon(0 4%, 38% 53%, 50% 64.5%, 62% 53%, 100% 4%, 100% 100%, 0 100%);
 }
 .env-flap-wrap {
   left: 0;
   right: 0;
   top: 0;
-  height: 54%;
+  height: 64.5%;
   z-index: 4;
   transform-origin: top;
   filter: drop-shadow(0 4px 4px rgba(60, 35, 20, 0.3));
@@ -379,11 +378,27 @@ img {
     transform 0.7s ease,
     z-index 0s 0.35s;
 }
-.env-flap {
+.env-flap,
+.env-flap-in {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #f6f0e3, #e9e0cb);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 6.2%, 62% 82.2%, 50% 100%, 38% 82.2%, 0 6.2%);
+}
+.env-flap {
+  background: url("/open/env.webp") top / 100% 155% no-repeat;
+}
+/* sisi dalam tutup: tampak setelah tutup terbalik (ditukar tepat di tengah putaran) */
+.env-flap-in {
+  background: linear-gradient(180deg, #d9d0ba, #e7dfcb);
+  opacity: 0;
+}
+.env.open .env-flap {
+  opacity: 0;
+  transition: opacity 0s 0.35s;
+}
+.env.open .env-flap-in {
+  opacity: 1;
+  transition: opacity 0s 0.35s;
 }
 .env.open .env-flap-wrap {
   transform: rotateX(180deg);
@@ -391,27 +406,98 @@ img {
 }
 .env-seal {
   left: 50%;
-  top: 54%;
+  top: 55%;
   z-index: 5;
-  width: 17%;
-  aspect-ratio: 1;
+  width: 25%;
+  aspect-ratio: 220 / 232;
   transform: translate(-50%, -50%);
-  display: grid !important;
-  place-items: center;
-  border-radius: 48% 52% 50% 50% / 52% 48% 52% 48%;
-  background: radial-gradient(circle at 35% 30%, #d4483f, #9a1a22 55%, #5e0d14);
-  box-shadow:
-    0 3px 8px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 3px rgba(255, 255, 255, 0.07),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.35);
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45));
   transition:
     opacity 0.4s,
     transform 0.6s;
 }
-.env-seal .script {
-  color: #f3d9d4;
-  font-size: clamp(13px, 4.4vw, 19px);
-  letter-spacing: 0;
+/* segel berbunga "bernapas" (mengecil lalu membesar) seperti pada referensi; dipisah agar tidak bentrok dengan transisi buka */
+.env-seal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/open/seal.webp") center / contain no-repeat;
+  animation: seal-breathe 5.3s ease-in-out infinite;
+}
+.env.open .env-seal::before {
+  animation: none;
+}
+@keyframes seal-breathe {
+  50% {
+    transform: scale(0.72);
+  }
+}
+
+/* kilauan bintang di atas bunga cover */
+.sparkles {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+.sp-tr {
+  top: -6px;
+  right: -34px;
+  width: 190px;
+  aspect-ratio: 469 / 793;
+}
+.sp-bl {
+  left: -62px;
+  bottom: -18px;
+  width: 280px;
+  aspect-ratio: 629 / 657;
+}
+.sp-br {
+  right: -52px;
+  bottom: -10px;
+  width: 215px;
+  aspect-ratio: 500 / 412;
+}
+.sparkles i {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+.sparkles i::before {
+  content: "";
+  position: absolute;
+  inset: -90%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 240, 190, 0.85), rgba(255, 225, 150, 0.25) 40%, transparent 65%);
+}
+.sparkles i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #fffbe8;
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+@keyframes twinkle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(45deg);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.8) rotate(70deg);
+  }
+  75% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(0.45) rotate(90deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0) rotate(135deg);
+  }
 }
 .env.open .env-seal {
   opacity: 0;
@@ -433,8 +519,12 @@ img {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cover-hint {
+  .cover-hint,
+  .env-seal::before {
     animation: none;
+  }
+  .sparkles {
+    display: none;
   }
 }
 
