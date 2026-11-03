@@ -1,6 +1,6 @@
 # Undangan Pernikahan Fifi & Abid
 
-Next.js 16 (App Router) · Lottie · Upstash Redis · siap deploy ke Vercel (`abidfifi.live`).
+Next.js 16 (App Router) · Lottie · Upstash Redis.
 
 Link tamu: `https://abidfifi.live/?to=Nama+Tamu`
 
@@ -34,21 +34,11 @@ npm run dev        # http://localhost:3000/?to=Nama+Tamu
 
 Tanpa Redis, komentar disimpan di memori (hilang saat server restart). Itu hanya untuk development.
 
-## Deploy ke Vercel
-
-1. Push proyek ke GitHub, lalu **Add New → Project** di Vercel dan pilih repo ini (atau jalankan `npx vercel`).
-2. Di project Vercel: **Storage / Marketplace → Upstash → Redis → Create**, lalu hubungkan ke project. Env
-   `UPSTASH_REDIS_REST_URL` dan `UPSTASH_REDIS_REST_TOKEN` (atau `KV_REST_API_URL` / `KV_REST_API_TOKEN`) terisi otomatis.
-3. Tambahkan env `ADMIN_TOKEN` (string acak panjang) untuk moderasi komentar.
-4. **Settings → Domains → Add** `abidfifi.live` (dan `www.abidfifi.live`). Ikuti record DNS yang ditampilkan Vercel
-   di registrar domain (biasanya `A 76.76.21.21` untuk apex dan `CNAME cname.vercel-dns.com` untuk `www`).
-5. Redeploy setelah env ditambahkan.
-
 > Tanpa Redis terpasang di production, `/api/rsvp` mengembalikan 503 (komentar tidak diterima) agar tidak ada data yang hilang diam-diam.
 
 ## Moderasi komentar
 
-Ambil `id` dari `GET /api/rsvp`, lalu:
+Atur env `ADMIN_TOKEN` (string acak panjang) di server. Ambil `id` dari `GET /api/rsvp`, lalu:
 
 ```bash
 curl -X DELETE "https://abidfifi.live/api/rsvp?id=<ID>" -H "Authorization: Bearer $ADMIN_TOKEN"

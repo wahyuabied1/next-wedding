@@ -22,37 +22,56 @@ export default function Gift() {
 
   return (
     <div className="gift">
-      <button type="button" className="btn wide" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+      <button
+        type="button"
+        className="btn wide"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls="gift-panel"
+      >
         {open ? "Tutup" : "Lihat Rekening"}
       </button>
 
-      {open && (
-        <div className="gift-panel">
-          <div className="gift-card">
-            <Image src={gift.bank.logo} alt="BCA" width={110} height={34} />
-            <p className="gift-number">{gift.bank.number}</p>
-            <p className="gift-holder">
-              <small>Atas Nama</small>
-              {gift.bank.holder}
-            </p>
-            <button type="button" className="copy" onClick={() => copy(gift.bank.number, "bank")} aria-label="Salin nomor rekening">
-              {copied === "bank" ? "berhasil disalin" : <CopyIcon />}
-            </button>
-          </div>
+      {/* Selalu dirender agar bisa membuka dan menutup dengan halus; saat tertutup tidak bisa difokus (inert). */}
+      <div className={`gift-collapse${open ? " open" : ""}`} inert={!open}>
+        <div className="gift-collapse-inner">
+          <div className="gift-panel" id="gift-panel">
+            <div className="gift-card">
+              <Image src={gift.bank.logo} alt="BCA" width={110} height={34} />
+              <p className="gift-number">{gift.bank.number}</p>
+              <p className="gift-holder">
+                <small>Atas Nama</small>
+                {gift.bank.holder}
+              </p>
+              <button
+                type="button"
+                className="copy"
+                onClick={() => copy(gift.bank.number, "bank")}
+                aria-label="Salin nomor rekening"
+              >
+                {copied === "bank" ? "berhasil disalin" : <CopyIcon />}
+              </button>
+            </div>
 
-          <div className="gift-card">
-            <p className="gift-label">{gift.address.label}</p>
-            <p className="gift-address">{gift.address.value}</p>
-            <button type="button" className="copy" onClick={() => copy(gift.address.value, "addr")} aria-label="Salin alamat">
-              {copied === "addr" ? "berhasil disalin" : <CopyIcon />}
-            </button>
-          </div>
+            <div className="gift-card">
+              <p className="gift-label">{gift.address.label}</p>
+              <p className="gift-address">{gift.address.value}</p>
+              <button
+                type="button"
+                className="copy"
+                onClick={() => copy(gift.address.value, "addr")}
+                aria-label="Salin alamat"
+              >
+                {copied === "addr" ? "berhasil disalin" : <CopyIcon />}
+              </button>
+            </div>
 
-          <a className="btn small" href={wa} target="_blank" rel="noopener noreferrer">
-            Konfirmasi Hadiah
-          </a>
+            <a className="btn small" href={wa} target="_blank" rel="noopener noreferrer">
+              Konfirmasi Hadiah
+            </a>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

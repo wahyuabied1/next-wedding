@@ -1,15 +1,51 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Photo } from "@/lib/photos";
 
 const INITIAL_COUNT = 9;
 const COLUMNS = 3;
+const LEAVE_MS = 380; // lama foto tambahan memudar sebelum dilepas saat "Tampilkan lebih sedikit"
+
+type ThumbProps = {
+  photo: Photo;
+  label: string;
+  extra: boolean; // foto tambahan (muncul setelah "Lihat semua")
+  delay: number;
+  leaving: boolean;
+  onOpen: () => void;
+};
+
+/** Foto kecil di galeri. Foto tambahan memudar masuk bergiliran, dan gambarnya baru tampil setelah selesai dimuat. */
+function Thumb({ photo, label, extra, delay, leaving, onOpen }: ThumbProps) {
+  const [ready, setReady] = useState(!extra);
+  return (
+    <button
+      type="button"
+      className={`gallery-item${extra ? " gallery-extra" : ""}${leaving ? " leaving" : ""}${ready ? "" : " waiting"}`}
+      style={extra ? { animationDelay: `${delay}ms` } : undefined}
+      onClick={onOpen}
+      aria-label={`Buka foto ${label}`}
+    >
+      <Image
+        src={photo.src}
+        alt={`Foto prewedding ${label}`}
+        width={photo.width}
+        height={photo.height}
+        sizes="(max-width: 500px) 33vw, 160px"
+        loading={extra ? "eager" : "lazy"}
+        onLoad={() => setReady(true)}
+      />
+    </button>
+  );
+}
 
 export default function Gallery({ photos: gallery }: { photos: Photo[] }) {
   const [active, setActive] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [leaving, setLeaving] = useState(false); // foto tambahan sedang memudar keluar
+  const gridRef = useRef<HTMLDivElement>(null);
   const visible = expanded ? gallery : gallery.slice(0, INITIAL_COUNT);
   const hidden = gallery.length - visible.length;
 
@@ -18,6 +54,27 @@ export default function Gallery({ photos: gallery }: { photos: Photo[] }) {
   const columns = [0, 1, 2].map((col) =>
     visible.map((photo, index) => ({ photo, index })).filter(({ index }) => index % COLUMNS === col),
   );
+
+  const toggle = () => {
+    if (leaving) return;
+    if (!expanded) {
+      setExpanded(true);
+      return;
+    }
+    // Menciut: foto tambahan memudar sambil halaman meluncur ke awal galeri, baru dilepas.
+    // Tanpa ini halaman memendek mendadak dan tamu terlempar ke bagian lain.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setExpanded(false);
+      return;
+    }
+    setLeaving(true);
+    gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => {
+      setExpanded(false);
+      setLeaving(false);
+    }, LEAVE_MS + 120);
+  };
 
   const step = useCallback(
     (dir: 1 | -1) => {
@@ -39,33 +96,32 @@ export default function Gallery({ photos: gallery }: { photos: Photo[] }) {
 
   return (
     <>
-      <div className="gallery">
+      <div className="gallery" ref={gridRef}>
         {columns.map((column, col) => (
           <div className="gallery-col" key={col}>
             {column.map(({ photo, index }) => (
-              <button
+              <Thumb
                 key={photo.src}
-                type="button"
-                className="gallery-item"
-                onClick={() => setActive(index)}
-                aria-label={`Buka foto ${index + 1}`}
-              >
-                <Image
-                  src={photo.src}
-                  alt={`Foto prewedding ${index + 1}`}
-                  width={photo.width}
-                  height={photo.height}
-                  sizes="(max-width: 500px) 33vw, 160px"
-                  loading="lazy"
-                />
-              </button>
+                photo={photo}
+                label={String(index + 1)}
+                extra={index >= INITIAL_COUNT}
+                delay={((index - INITIAL_COUNT) % 9) * 70}
+                leaving={leaving}
+                onOpen={() => setActive(index)}
+              />
             ))}
           </div>
         ))}
       </div>
 
       {gallery.length > INITIAL_COUNT && (
-        <button type="button" className="btn wide gallery-more" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded}>
+        <button
+          type="button"
+          className="btn wide gallery-more"
+          onClick={toggle}
+          aria-expanded={expanded}
+          disabled={leaving}
+        >
           {expanded ? "Tampilkan lebih sedikit" : `Lihat semua (${hidden} foto lagi)`}
         </button>
       )}

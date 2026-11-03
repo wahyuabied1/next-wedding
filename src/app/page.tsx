@@ -8,7 +8,7 @@ import Opening from "@/components/Opening";
 import { Divider, Flora, PhotoOval } from "@/components/Ornaments";
 import Reveal from "@/components/Reveal";
 import Rsvp from "@/components/Rsvp";
-import { calendarUrl, countdownTarget, couple, events, galleryExclude, venue } from "@/lib/config";
+import { calendarUrl, countdownTarget, couple, events, galleryExclude, galleryFirst, gallerySwaps, venue } from "@/lib/config";
 import { getAllPhotos, getPhoto } from "@/lib/photos";
 
 function dateParts(iso: string) {
@@ -56,7 +56,7 @@ const CalendarIcon = () => (
 
 export default function Home() {
   const together = getPhoto(couple.together.photo);
-  const galleryPhotos = getAllPhotos(galleryExclude);
+  const galleryPhotos = getAllPhotos(galleryExclude, galleryFirst, gallerySwaps);
   const date = dateParts(events[0].start);
   const [akad, resepsi] = events;
 

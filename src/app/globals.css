@@ -810,15 +810,52 @@ img {
   overflow: hidden;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
+.gallery {
+  scroll-margin-top: 72px; /* sisakan ruang saat meluncur kembali ke awal galeri */
+}
 .gallery-item img {
   width: 100%;
-  transition: transform 0.4s;
+  transition:
+    transform 0.4s,
+    opacity 0.5s;
+}
+/* foto tambahan: kotak memudar masuk bergiliran; gambar tampil halus setelah termuat */
+.gallery-item.waiting img {
+  opacity: 0;
+}
+.gallery-extra {
+  animation: gallery-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.gallery-extra.leaving {
+  animation: gallery-out 0.38s ease both;
+}
+@keyframes gallery-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+}
+@keyframes gallery-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gallery-extra,
+  .gallery-extra.leaving {
+    animation: none;
+  }
 }
 .gallery-item:hover img {
   transform: scale(1.05);
 }
 .gallery-more {
   margin-top: 22px;
+}
+.gallery-more:disabled {
+  opacity: 0.7;
+  cursor: default;
 }
 
 .lightbox {
@@ -868,12 +905,66 @@ img {
   display: grid;
   justify-items: center;
 }
+/* panel rekening membuka/menutup dengan tinggi yang beranimasi (grid 0fr -> 1fr), lalu kartu memudar masuk bergiliran */
+.gift-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  width: calc(100% + 40px); /* ruang kiri-kanan agar bayangan kartu tidak terpotong */
+  margin-inline: -20px;
+  visibility: hidden;
+  transition:
+    grid-template-rows 0.7s cubic-bezier(0.3, 0.7, 0.2, 1),
+    visibility 0s 0.7s;
+}
+.gift-collapse.open {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition:
+    grid-template-rows 0.7s cubic-bezier(0.3, 0.7, 0.2, 1),
+    visibility 0s;
+}
+.gift-collapse-inner {
+  min-height: 0;
+  overflow: hidden;
+  padding-inline: 20px;
+}
 .gift-panel {
   display: grid;
   justify-items: center;
   gap: 14px;
   width: 100%;
-  margin-top: 22px;
+  padding: 22px 0 28px;
+}
+.gift-panel > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+.gift-collapse.open .gift-panel > * {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.6s,
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.gift-collapse.open .gift-panel > :nth-child(1) {
+  transition-delay: 0.15s;
+}
+.gift-collapse.open .gift-panel > :nth-child(2) {
+  transition-delay: 0.28s;
+}
+.gift-collapse.open .gift-panel > :nth-child(3) {
+  transition-delay: 0.41s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gift-collapse,
+  .gift-collapse.open,
+  .gift-panel > *,
+  .gift-collapse.open .gift-panel > * {
+    transition: none;
+  }
 }
 .gift-card {
   position: relative;

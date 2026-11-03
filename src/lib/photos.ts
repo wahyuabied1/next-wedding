@@ -9,13 +9,26 @@ const photos = manifest as Record<string, Photo>;
 const EXTENSIONS = /\.(webp|jpe?g|png|avif|gif)$/i;
 const keyOf = (name: string) => name.replace(EXTENSIONS, "").toLowerCase();
 
-/** Semua foto di public/photos (urut nama, angka diurutkan secara numerik), kecuali yang dikecualikan. */
-export function getAllPhotos(exclude: string[] = []): Photo[] {
+/**
+ * Semua foto di public/photos (urut nama, angka diurutkan secara numerik), kecuali yang dikecualikan.
+ * Nama di `first` ditaruh paling depan sesuai urutannya; setelah itu tiap pasangan di `swaps` ditukar posisinya.
+ */
+export function getAllPhotos(exclude: string[] = [], first: string[] = [], swaps: [string, string][] = []): Photo[] {
   const skip = new Set(exclude.map(keyOf));
-  return Object.keys(photos)
+  const front = first.map(keyOf);
+  const rank = (key: string) => {
+    const i = front.indexOf(key);
+    return i === -1 ? front.length : i;
+  };
+  const keys = Object.keys(photos)
     .filter((key) => !skip.has(key))
-    .sort((a, b) => a.localeCompare(b, "en", { numeric: true }))
-    .map((key) => photos[key]);
+    .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b, "en", { numeric: true }));
+  for (const [a, b] of swaps) {
+    const i = keys.indexOf(keyOf(a));
+    const j = keys.indexOf(keyOf(b));
+    if (i !== -1 && j !== -1) [keys[i], keys[j]] = [keys[j], keys[i]];
+  }
+  return keys.map((key) => photos[key]);
 }
 
 /**

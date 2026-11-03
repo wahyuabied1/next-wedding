@@ -103,6 +103,20 @@ export const gift = {
 // (bingkai berdua + potret Fifi + potret Abid) tidak diulang di galeri.
 export const galleryExclude: string[] = [couple.together.photo, couple.bride.photo, couple.groom.photo];
 
+// Foto yang ditampilkan paling depan di galeri (urutan sisanya mengikuti nama file).
+export const galleryFirst: string[] = ["photo-couple"];
+
+// Pasangan foto yang ditukar posisinya, berurutan setelah urutan di atas:
+// 1) photo-7 dan photo-couple, 2) photo-7 dan photo-8 (jadi photo-8 di depan, photo-7 di urutan ke-10),
+// 3) photo-couple dan photo-004 (jadi photo-couple di urutan ke-6, photo-004 di urutan ke-9),
+// 4) photo-22 dan photo-21 (saling bertukar tempat).
+export const gallerySwaps: [string, string][] = [
+  ["photo-7", "photo-couple"],
+  ["photo-7", "photo-8"],
+  ["photo-couple", "photo-004"],
+  ["photo-22", "photo-21"],
+];
+
 // Daftar lagu, dicoba berurutan: file yang tidak ada dilewati otomatis, jadi lagu pertama
 // yang benar-benar ada di public/audio yang diputar. Taruh MP3 baru di urutan paling atas.
 export const audioSources = ["/audio/love-story.mp3", "/audio/song.mp3"];

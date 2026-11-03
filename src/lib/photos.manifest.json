@@ -104,10 +104,10 @@
     "width": 720,
     "height": 1080
   },
-  "photo-7": {
-    "src": "/photos/photo-7.webp",
-    "width": 1080,
-    "height": 720
+  "photo-couple": {
+    "src": "/photos/photo-couple.webp",
+    "width": 1000,
+    "height": 1500
   },
   "photo-8": {
     "src": "/photos/photo-8.webp",
@@ -118,5 +118,9 @@
     "src": "/photos/photo-9.webp",
     "width": 720,
     "height": 1080
+  },"photo-7": {
+    "src": "/photos/photo-7.webp",
+    "width": 1080,
+    "height": 720
   }
 }
